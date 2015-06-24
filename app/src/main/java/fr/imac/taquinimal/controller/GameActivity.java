@@ -2,15 +2,13 @@ package fr.imac.taquinimal.controller;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
+import android.widget.LinearLayout;
 
 import fr.imac.taquinimal.App;
+import fr.imac.taquinimal.R;
 import fr.imac.taquinimal.utils.OnSwipeTouchListener;
 import fr.imac.taquinimal.view.GameView;
 
@@ -22,6 +20,8 @@ public class GameActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        App.getInstance().initGameActivity(this);
+
         super.onCreate(savedInstanceState);
 
         //Full screen
@@ -29,29 +29,30 @@ public class GameActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        App.getInstance().initGameActivity(this);
-
         engine = new GameEngine();
-        view = new GameView(getApplicationContext(), engine);
-        setContentView(view);
-        view.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
+        setContentView(R.layout.activity_game);
+
+        view = (GameView) findViewById(R.id.gameview);
+
+        LinearLayout globalWrapper = (LinearLayout) findViewById(R.id.global_wrapper);
+
+        globalWrapper.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
             public void onSwipeTop() {
-                engine.onSwipeUp();
+                engine.onSwipe(Swipe.UP);
             }
 
             public void onSwipeRight() {
-                engine.onSwipeRight();
+                engine.onSwipe(Swipe.RIGHT);
             }
 
             public void onSwipeLeft() {
-                engine.onSwipeLeft();
+                engine.onSwipe(Swipe.LEFT);
             }
 
             public void onSwipeBottom() {
-                engine.onSwipeDown();
+                engine.onSwipe(Swipe.DOWN);
             }
         });
-
         gameThread = new GameThread(engine);
         gameThread.setState(GameThread.RUNNING);
         gameThread.start();
@@ -97,5 +98,12 @@ public class GameActivity extends Activity {
         gameThread.setState(GameThread.PAUSED);
 
         //TODO: save progress
+    }
+
+    public enum Swipe {
+        UP,
+        DOWN,
+        RIGHT,
+        LEFT
     }
 }

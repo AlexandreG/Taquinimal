@@ -8,6 +8,7 @@ import android.view.Display;
 import android.view.WindowManager;
 
 import fr.imac.taquinimal.controller.GameActivity;
+import fr.imac.taquinimal.utils.Values;
 
 /**
  * Created by AG on 23/06/2015.
@@ -20,6 +21,8 @@ public class App extends Application {
     //the screen size
     private int screenW;
     private int screenH;
+
+    private int boardWidth;
 
     @Override
     public void onCreate() {
@@ -75,6 +78,14 @@ public class App extends Application {
 
     public int getScreenW(){
         return screenW;
+    }
+
+    public int getBoardWidth() {
+        return boardWidth;
+    }
+
+    public void setBoardWidth(int boardWidth) {
+        this.boardWidth = boardWidth;
     }
 }
 

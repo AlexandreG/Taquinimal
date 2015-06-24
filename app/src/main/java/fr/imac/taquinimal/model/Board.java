@@ -10,12 +10,13 @@ import fr.imac.taquinimal.R;
 import fr.imac.taquinimal.utils.Utils;
 import fr.imac.taquinimal.utils.Values;
 
-/** The board of the game
- *
+/**
+ * The board of the game
+ * <p/>
  * Created by AG on 23/06/2015.
  */
 public class Board {
-    private int[][] map;
+    private int[][] map;//the map of the game : -1 if empty, id of the animal in the list else
     private Bitmap bp;
 
     private final float width;
@@ -23,52 +24,54 @@ public class Board {
     private final int y;
 
     private float boxWidth;
-    private float boxMargin;
 
-    public Board(){
+    public Board() {
         map = new int[Values.BOARD_SIZE][Values.BOARD_SIZE];
-        for(int i=0; i<Values.BOARD_SIZE ; ++i){
-            for(int j=0; j<Values.BOARD_SIZE ; ++j) {
-                map[i][j] = 0;
+        for (int i = 0; i < Values.BOARD_SIZE; ++i) {
+            for (int j = 0; j < Values.BOARD_SIZE; ++j) {
+                map[i][j] = -1;
             }
         }
 
-        boxMargin = Values.BOARD_W_MARGIN*App.getInstance().getScreenW();
-        width = App.getInstance().getScreenW()-2*boxMargin;
-        x = App.getInstance().getScreenW()/2;
-        y = App.getInstance().getScreenH()/2;
+        width = App.getInstance().getBoardWidth();
+        x = App.getInstance().getBoardWidth() / 2;
+        y = App.getInstance().getBoardWidth() / 2;
 
-        boxWidth = width/Values.BOARD_SIZE;
+        boxWidth = width / Values.BOARD_SIZE;
 
         Bitmap temp = BitmapFactory.decodeResource(App.getInstance().getContext().getResources(), R.drawable.board_background);
-        bp = Utils.getResizedBitmap(temp, (int)width, (int)width);
+        bp = Utils.getResizedBitmap(temp, (int) width, (int) width);
         temp.recycle();
     }
 
-    public void draw(Canvas canvas, Paint paint){
+    public void draw(Canvas canvas, Paint paint) {
         canvas.drawBitmap(bp, x - bp.getWidth() / 2, y - bp.getHeight() / 2, paint);
     }
 
-    public float getBoxWidth(){
+    public float getBoxWidth() {
         return boxWidth;
     }
 
     /**
      * indicate if the box at i,j is empty or not
+     *
      * @param i
      * @param j
      * @return
      */
-    public boolean isMapEmpty(int i, int j){
-        if(map[i][j] == 0){
+    public boolean isMapEmpty(int i, int j) {
+        if (map[i][j] == -1) {
             return true;
-        }else {
+        } else {
             return false;
         }
     }
 
-    public float getBoxMargin() {
-        return boxMargin;
+    /**
+     * Save in the map the id of the given animal or -1 if empty
+     */
+    public void setBox(int i, int j, int id) {
+        map[i][j] = id;
     }
 
     public float getWidth() {

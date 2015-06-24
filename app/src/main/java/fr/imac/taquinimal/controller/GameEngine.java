@@ -28,24 +28,29 @@ public class GameEngine {
 
     private Board board;
 
-    public GameEngine() {
+    private int nbAnimalMoving;
+    private GameActivity.Swipe lastEvent;
+
+    public void initGame() {
         animalList = new LinkedList<Animal>();
         animalImageList = new HashMap<Animal.AnimalType, Bitmap>();
         board = new Board();
 
-        initGame();
-    }
-
-    public void initGame() {
         //init the bitmap with the righ size
         loadAnimalBitmaps();
 
         //add few animals
-        animalList.add(new Animal(Animal.AnimalType.BEAR, animalImageList.get(Animal.AnimalType.BEAR), 0, 0, getXPosFromMap(0), getYPosFromMap(0)));
-        animalList.add(new Animal(Animal.AnimalType.CAT, animalImageList.get(Animal.AnimalType.CAT), 3, 4, getXPosFromMap(3), getYPosFromMap(4)));
-        animalList.add(new Animal(Animal.AnimalType.ELEPHANT, animalImageList.get(Animal.AnimalType.ELEPHANT), 3, 2, getXPosFromMap(3), getYPosFromMap(2)));
+        animalList.add(new Animal(this, Animal.AnimalType.BEAR, animalImageList.get(Animal.AnimalType.BEAR), 0, 0, getXPosFromMap(0), getYPosFromMap(0)));
+        board.setBox(animalList.get(0).getMapX(), animalList.get(0).getMapY(), 0);
+        animalList.add(new Animal(this, Animal.AnimalType.CAT, animalImageList.get(Animal.AnimalType.CAT), 3, 4, getXPosFromMap(3), getYPosFromMap(4)));
+        board.setBox(animalList.get(1).getMapX(), animalList.get(1).getMapY(), 1);
+        animalList.add(new Animal(this, Animal.AnimalType.ELEPHANT, animalImageList.get(Animal.AnimalType.ELEPHANT), 3, 2, getXPosFromMap(3), getYPosFromMap(2)));
+        board.setBox(animalList.get(2).getMapX(), animalList.get(2).getMapY(), 2);
     }
 
+    /**
+     * Load bitmaps from memory to java objects
+     */
     private void loadAnimalBitmaps(){
         //load the bitmaps
         LinkedList<Bitmap> temp = new LinkedList<Bitmap>();
@@ -87,8 +92,10 @@ public class GameEngine {
      * Move all animals and board
      */
     private void moveAll() {
-        for (Animal a : animalList){
-            a.move();
+        if (animalList !=null){
+            for (Animal a : animalList){
+                a.move();
+            }
         }
     }
 
@@ -113,7 +120,7 @@ public class GameEngine {
      * @return
      */
     public float getXPosFromMap(int xMap){
-        return board.getBoxMargin()+0.5f*board.getBoxWidth()+xMap*board.getBoxWidth();
+        return 0.5f*board.getBoxWidth()+xMap*board.getBoxWidth();
     }
 
     /**
@@ -122,30 +129,98 @@ public class GameEngine {
      * @return
      */
     public float getYPosFromMap(int yMap){
-        return App.getInstance().getScreenH()/2-0.5f*board.getWidth()+0.5f*board.getBoxWidth()+yMap*board.getBoxWidth();
+        return 0.5f*board.getBoxWidth()+yMap*board.getBoxWidth();
+        //return App.getInstance().getScreenH()/2-0.5f*board.getWidth()+0.5f*board.getBoxWidth()+yMap*board.getBoxWidth();
+    }
+
+    /**
+     * Convert the coordinate in the screen to the position in the map
+     */
+    public int getXMapFromPos(float x){
+        for(int i=0 ; i<Values.BOARD_SIZE ; ++i){
+            if(i*board.getWidth()< x && x < (i+1)*board.getWidth()){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Convert the coordinate in the screen to the position in the map
+     */
+    public int getYMapFromPos(float y){
+        for(int i=0 ; i<Values.BOARD_SIZE ; ++i){
+            if(i*board.getWidth()< y && y < (i+1)*board.getWidth()){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public void onSwipe(GameActivity.Swipe s){
+        lastEvent = s;
+        if(nbAnimalMoving == 0){
+            switch (s){
+                case UP:
+                    onSwipeUp();
+                    break;
+                case DOWN:
+                    onSwipeDown();
+                    break;
+                case LEFT:
+                    onSwipeLeft();
+                    break;
+                case RIGHT:
+                    onSwipeRight();
+                    break;
+            }
+        }
     }
 
     public void onSwipeUp(){
         for (Animal a : animalList){
-            a.setSpeed(0,-Values.ANIMAL_SPEED);
+            a.moveUp();
         }
     }
 
     public void onSwipeDown(){
         for (Animal a : animalList){
-            a.setSpeed(0,Values.ANIMAL_SPEED);
+            a.moveDown();
         }
     }
 
     public void onSwipeLeft(){
         for (Animal a : animalList){
-            a.setSpeed(-Values.ANIMAL_SPEED, 0);
+            a.moveLeft();
         }
     }
 
     public void onSwipeRight(){
         for (Animal a : animalList){
-            a.setSpeed(Values.ANIMAL_SPEED, 0);
+            a.moveRight();
         }
+    }
+
+    public GameActivity.Swipe getLastEvent() {
+        return lastEvent;
+    }
+
+    public void savePosOnBoard(Animal a){
+        board.setBox(a.getMapX(), a.getMapY(), animalList.indexOf(a));
+    }
+
+    public void setNbAnimalMoving(int nbAnimalMoving) {
+        this.nbAnimalMoving = nbAnimalMoving;
+    }
+
+    public void setNbAnimalMovingPlus1() {
+        ++nbAnimalMoving;
+    }
+    public void setNbAnimalMovingMinus1() {
+        --nbAnimalMoving;
+    }
+
+    public int getNbAnimalMoving() {
+        return nbAnimalMoving;
     }
 }
