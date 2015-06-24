@@ -18,6 +18,8 @@ public class GameActivity extends Activity {
     private GameThread gameThread;
     private GameEngine engine;
 
+    private LinearLayout globalWrapper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         App.getInstance().initGameActivity(this);
@@ -34,7 +36,7 @@ public class GameActivity extends Activity {
 
         view = (GameView) findViewById(R.id.gameview);
 
-        LinearLayout globalWrapper = (LinearLayout) findViewById(R.id.global_wrapper);
+        globalWrapper = (LinearLayout) findViewById(R.id.global_wrapper);
 
         globalWrapper.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
             public void onSwipeTop() {

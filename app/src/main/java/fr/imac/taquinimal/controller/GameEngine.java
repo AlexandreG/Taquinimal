@@ -137,8 +137,10 @@ public class GameEngine {
      * Convert the coordinate in the screen to the position in the map
      */
     public int getXMapFromPos(float x){
+        Log.d("a", "x "+x+ " between 0 and "+board.getWidth() );
         for(int i=0 ; i<Values.BOARD_SIZE ; ++i){
-            if(i*board.getWidth()< x && x < (i+1)*board.getWidth()){
+            if(i*board.getBoxWidth()<= x && x <= (i+1)*board.getBoxWidth()){
+                Log.d("a", "returned "+i);
                 return i;
             }
         }
@@ -150,7 +152,7 @@ public class GameEngine {
      */
     public int getYMapFromPos(float y){
         for(int i=0 ; i<Values.BOARD_SIZE ; ++i){
-            if(i*board.getWidth()< y && y < (i+1)*board.getWidth()){
+            if(i*board.getBoxWidth()<= y && y <= (i+1)*board.getBoxWidth()){
                 return i;
             }
         }
@@ -158,6 +160,8 @@ public class GameEngine {
     }
 
     public void onSwipe(GameActivity.Swipe s){
+        Log.d("a", "event : "+s);
+
         lastEvent = s;
         if(nbAnimalMoving == 0){
             switch (s){

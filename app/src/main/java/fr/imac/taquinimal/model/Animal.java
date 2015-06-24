@@ -3,6 +3,7 @@ package fr.imac.taquinimal.model;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.Log;
 
 import fr.imac.taquinimal.controller.GameEngine;
 import fr.imac.taquinimal.utils.Values;
@@ -11,6 +12,8 @@ import fr.imac.taquinimal.utils.Values;
  * Created by AG on 23/06/2015.
  */
 public class Animal {
+    public final static float WALL_COLLIDE_PAD = Values.ANIMAL_SPEED/2;
+
     private GameEngine engine;
 
     private AnimalType type;
@@ -55,17 +58,18 @@ public class Animal {
             //collide
             switch (engine.getLastEvent()){
                 case DOWN:
-                    if(y > targetY+engine.getBoard().getBoxWidth()/2){
+                    if(targetY <y){
                         y = targetY;
                         x = targetX;
                         mapY = engine.getYMapFromPos(y);
                         engine.savePosOnBoard(this);
                         state = AnimalState.IDLE;
                         engine.setNbAnimalMovingMinus1();
+                        Log.w("a", "collide down " + mapX + " " + mapY);
                     }
                     break;
                 case UP:
-                    if(y < targetY+engine.getBoard().getBoxWidth()/2){
+                    if(targetY > y){
                         y = targetY;
                         x = targetX;
                         mapY = engine.getYMapFromPos(y);
@@ -73,11 +77,12 @@ public class Animal {
                         engine.savePosOnBoard(this);
                         state = AnimalState.IDLE;
                         engine.setNbAnimalMovingMinus1();
+                        Log.w("a", "collide up " + mapX + " " + mapY);
                     }
 
                     break;
                 case LEFT:
-                    if(x < targetX-engine.getBoard().getBoxWidth()/2){
+                    if(targetX > x){
                         y = targetY;
                         x = targetX;
                         mapX = engine.getXMapFromPos(x);
@@ -85,11 +90,12 @@ public class Animal {
                         engine.savePosOnBoard(this);
                         state = AnimalState.IDLE;
                         engine.setNbAnimalMovingMinus1();
+                        Log.w("a", "collide left " + mapX + " " + mapY);
                     }
 
                     break;
                 case RIGHT:
-                    if(x > targetX+engine.getBoard().getBoxWidth()/2){
+                    if(targetX < x){
                         y = targetY;
                         x = targetX;
                         mapX = engine.getXMapFromPos(x);
@@ -97,6 +103,7 @@ public class Animal {
                         engine.savePosOnBoard(this);
                         state = AnimalState.IDLE;
                         engine.setNbAnimalMovingMinus1();
+                        Log.w("a", "collide right " + mapX + " " + mapY);
                     }
 
                     break;
@@ -131,7 +138,7 @@ public class Animal {
 
     public void moveLeft(){
         //no wall on the left
-        if(mapY != 0){
+        if(mapX != 0){
 
             targetX = engine.getXPosFromMap(0);
             targetY = y;
@@ -161,7 +168,7 @@ public class Animal {
         //no wall down
         if(mapY != Values.BOARD_SIZE-1){
 
-            targetY = engine.getXPosFromMap(Values.BOARD_SIZE-1);
+            targetY = engine.getYPosFromMap(Values.BOARD_SIZE-1);
             targetX = x;
             engine.getBoard().setBox(mapX, mapY, -1);
 
