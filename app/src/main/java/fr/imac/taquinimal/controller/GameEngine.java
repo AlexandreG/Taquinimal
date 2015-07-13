@@ -23,6 +23,8 @@ import fr.imac.taquinimal.utils.Values;
  */
 public class GameEngine implements Animal.AnimalListener {
     private LinkedList<Animal> animalList;
+    private int nbAnimalToAdd;
+
     private HashMap<Animal.AnimalType, Bitmap> animalImageList;
 
     private Board board;
@@ -32,10 +34,13 @@ public class GameEngine implements Animal.AnimalListener {
 
     //prevent OnMesure to init the game several times
     private boolean isGameInitiated = false;
+    private Random r;
 
     public void initGame() {
         if (!isGameInitiated) {
+            r = new Random();
             animalList = new LinkedList<Animal>();
+            nbAnimalToAdd = 0;
             animalImageList = new HashMap<Animal.AnimalType, Bitmap>();
             board = new Board();
 
@@ -43,7 +48,7 @@ public class GameEngine implements Animal.AnimalListener {
             loadAnimalBitmaps();
 
             //add few animals
-            fillBoard(Values.NB_ANIMAL_AT_LAUNCH);
+            addAnimal(Values.NB_ANIMAL_AT_LAUNCH);
 
             isGameInitiated = true;
         }
@@ -74,7 +79,6 @@ public class GameEngine implements Animal.AnimalListener {
         animalImageList.put(Animal.AnimalType.OWL, Utils.getResizedBitmap(temp.get(6), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
         animalImageList.put(Animal.AnimalType.SNAKE, Utils.getResizedBitmap(temp.get(7), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
 
-
         //release memory
         for (Bitmap b : temp) {
             b.recycle();
@@ -86,21 +90,22 @@ public class GameEngine implements Animal.AnimalListener {
      *
      * @param n number of animal to add
      */
-    private void fillBoard(int n) {
-        Random r = new Random();
+    private void addAnimal(int n) {
         Animal a;
-        Animal.AnimalType t;
+        Animal.AnimalType type;
         int[] mapPos;
 
         for (int i = 0; i < n; ++i) {
-            t = Utils.getRandomAnimalType(r);
+            type = Utils.getRandomAnimalType(r);
+            Log.d("a", "new animal : "+type);
             mapPos = board.getAvailablePos(r);
             if (mapPos != null) {
-                a = new Animal(this, t, animalImageList.get(t), mapPos[0], mapPos[1], GameHelper.getInstance().getXPosFromMap(mapPos[0]), GameHelper.getInstance().getYPosFromMap(mapPos[1]));
+                a = new Animal(this, type, animalImageList.get(type), mapPos[0], mapPos[1], GameHelper.getInstance().getXPosFromMap(mapPos[0]), GameHelper.getInstance().getYPosFromMap(mapPos[1]));
                 animalList.add(a);
                 board.setBox(mapPos[0], mapPos[1], animalList.indexOf(a));
             }
         }
+        //todo: deal with the game over
     }
 
     /**
@@ -109,6 +114,10 @@ public class GameEngine implements Animal.AnimalListener {
     public void update() {
         moveAll();
         drawAll();
+        if(nbAnimalToAdd!=0){
+            addAnimal(nbAnimalToAdd);
+            nbAnimalToAdd = 0;
+        }
     }
 
     /**
@@ -237,6 +246,9 @@ public class GameEngine implements Animal.AnimalListener {
     @Override
     public void stoppedMoving() {
         --nbAnimalMoving;
+        if(nbAnimalMoving == 0){
+            ++nbAnimalToAdd;
+        }
     }
 
     @Override

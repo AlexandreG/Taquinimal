@@ -52,10 +52,8 @@ public class Animal {
      * @param paint
      */
     public void draw(Canvas canvas, Paint paint) {
-        try {
+        if(bp != null){
             canvas.drawBitmap(bp, x - bp.getWidth() / 2, y - bp.getHeight() / 2, paint);
-        }catch (Exception e){
-            e.printStackTrace();
         }
     }
 
@@ -227,7 +225,6 @@ public class Animal {
     }
 
     public enum AnimalType {
-        ERROR(-1),
         CROCO(1),
         BEAR(2),
         CAT(3),
@@ -250,7 +247,7 @@ public class Animal {
             for(AnimalType e : AnimalType.values()){
                 if(code == e.code) return e;
             }
-            return AnimalType.ERROR; //or null
+            return null;
         }
     }
 
