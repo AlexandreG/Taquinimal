@@ -3,6 +3,10 @@ package fr.imac.taquinimal.utils;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 
+import java.util.Random;
+
+import fr.imac.taquinimal.model.Animal;
+
 /**
  * Created by AG on 23/06/2015.
  */
@@ -27,5 +31,9 @@ public class Utils {
         Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, false);
         return resizedBitmap;
 
+    }
+
+    public static Animal.AnimalType getRandomAnimalType(Random r){
+        return Animal.AnimalType.getAnimalFromCode(r.nextInt(Animal.AnimalType.values().length));
     }
 }

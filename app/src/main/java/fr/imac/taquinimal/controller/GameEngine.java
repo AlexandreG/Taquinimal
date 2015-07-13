@@ -6,6 +6,7 @@ import android.util.Log;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Random;
 
 import fr.imac.taquinimal.App;
 import fr.imac.taquinimal.R;
@@ -42,7 +43,7 @@ public class GameEngine implements Animal.AnimalListener {
             loadAnimalBitmaps();
 
             //add few animals
-            fillBoard();
+            fillBoard(Values.NB_ANIMAL_AT_LAUNCH);
 
             isGameInitiated = true;
         }
@@ -80,13 +81,26 @@ public class GameEngine implements Animal.AnimalListener {
         }
     }
 
-    private void fillBoard() {
-        animalList.add(new Animal(this, Animal.AnimalType.BEAR, animalImageList.get(Animal.AnimalType.BEAR), 0, 0, GameHelper.getInstance().getXPosFromMap(0), GameHelper.getInstance().getYPosFromMap(0)));
-        board.setBox(animalList.get(0).getMapX(), animalList.get(0).getMapY(), 0);
-        animalList.add(new Animal(this, Animal.AnimalType.CAT, animalImageList.get(Animal.AnimalType.CAT), 3, 4, GameHelper.getInstance().getXPosFromMap(3), GameHelper.getInstance().getYPosFromMap(4)));
-        board.setBox(animalList.get(1).getMapX(), animalList.get(1).getMapY(), 1);
-        animalList.add(new Animal(this, Animal.AnimalType.ELEPHANT, animalImageList.get(Animal.AnimalType.ELEPHANT), 3, 2, GameHelper.getInstance().getXPosFromMap(3), GameHelper.getInstance().getYPosFromMap(2)));
-        board.setBox(animalList.get(2).getMapX(), animalList.get(2).getMapY(), 2);
+    /**
+     * Fill the board with n random animal
+     *
+     * @param n number of animal to add
+     */
+    private void fillBoard(int n) {
+        Random r = new Random();
+        Animal a;
+        Animal.AnimalType t;
+        int[] mapPos;
+
+        for (int i = 0; i < n; ++i) {
+            t = Utils.getRandomAnimalType(r);
+            mapPos = board.getAvailablePos(r);
+            if (mapPos != null) {
+                a = new Animal(this, t, animalImageList.get(t), mapPos[0], mapPos[1], GameHelper.getInstance().getXPosFromMap(mapPos[0]), GameHelper.getInstance().getYPosFromMap(mapPos[1]));
+                animalList.add(a);
+                board.setBox(mapPos[0], mapPos[1], animalList.indexOf(a));
+            }
+        }
     }
 
     /**
@@ -148,10 +162,10 @@ public class GameEngine implements Animal.AnimalListener {
 
     public void onSwipeUp() {
         int id = -1;
-        for (int j = 0; j <=  Values.BOARD_SIZE - 1; ++j) {
+        for (int j = 0; j <= Values.BOARD_SIZE - 1; ++j) {
             for (int i = 0; i <= Values.BOARD_SIZE - 1; ++i) {
-                id = board.getBox(i,j);
-                if (id !=-1) {
+                id = board.getBox(i, j);
+                if (id != -1) {
                     animalList.get(id).moveUp(board);
                 }
             }
@@ -162,8 +176,8 @@ public class GameEngine implements Animal.AnimalListener {
         int id = -1;
         for (int j = Values.BOARD_SIZE - 1; j >= 0; --j) {
             for (int i = 0; i <= Values.BOARD_SIZE - 1; ++i) {
-                id = board.getBox(i,j);
-                if (id !=-1) {
+                id = board.getBox(i, j);
+                if (id != -1) {
                     animalList.get(id).moveDown(board);
                 }
             }
@@ -172,10 +186,10 @@ public class GameEngine implements Animal.AnimalListener {
 
     public void onSwipeLeft() {
         int id = -1;
-        for (int i = 0 ; i <= Values.BOARD_SIZE - 1; ++i) {
+        for (int i = 0; i <= Values.BOARD_SIZE - 1; ++i) {
             for (int j = 0; j <= Values.BOARD_SIZE - 1; ++j) {
-                id = board.getBox(i,j);
-                if (id !=-1) {
+                id = board.getBox(i, j);
+                if (id != -1) {
                     animalList.get(id).moveLeft(board);
                 }
             }
@@ -186,8 +200,8 @@ public class GameEngine implements Animal.AnimalListener {
         int id = -1;
         for (int i = Values.BOARD_SIZE - 1; i >= 0; --i) {
             for (int j = 0; j <= Values.BOARD_SIZE - 1; ++j) {
-                id = board.getBox(i,j);
-                if (id !=-1) {
+                id = board.getBox(i, j);
+                if (id != -1) {
                     animalList.get(id).moveRight(board);
                 }
             }

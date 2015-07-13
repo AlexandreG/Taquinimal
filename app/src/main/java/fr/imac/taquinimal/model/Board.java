@@ -5,6 +5,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import java.util.LinkedList;
+import java.util.Random;
+
 import fr.imac.taquinimal.App;
 import fr.imac.taquinimal.R;
 import fr.imac.taquinimal.utils.GameHelper;
@@ -67,9 +70,32 @@ public class Board {
     }
 
     /**
+     * Look at all positions and select one of the empty
+     *
+     * @param r the random to use
+     * @return the position or null if we are full
+     */
+    public int[] getAvailablePos(Random r) {
+        LinkedList<int[]> availablePos = new LinkedList<int[]>();
+        //First we list all availables positions
+        for (int i = 0; i < map.length; ++i) {
+            for (int j = 0; j < map.length; ++j) {
+                if (map[i][j] == -1) {
+                    availablePos.add(new int[]{i, j});
+                }
+            }
+        }
+        if (availablePos.size() == 0) {
+            return null;
+        } else {
+            return availablePos.get(r.nextInt(availablePos.size()));
+        }
+    }
+
+    /**
      * Return the id of the animal at the given pos or -1 if empty
      */
-    public int getBox(int i, int j){
+    public int getBox(int i, int j) {
         return map[i][j];
     }
 
@@ -82,5 +108,20 @@ public class Board {
 
     public float getWidth() {
         return width;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < map.length; ++i) {
+            sb.append("\n");
+            for (int j = 0; j < map.length; ++j) {
+                sb.append(map[i][j]);
+                sb.append(" ");
+
+            }
+        }
+        return sb.toString();
     }
 }

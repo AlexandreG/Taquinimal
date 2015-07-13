@@ -1,5 +1,9 @@
 package fr.imac.taquinimal.utils;
 
+import java.util.Random;
+
+import fr.imac.taquinimal.model.Animal;
+
 /**
  * Created by AG on 13/07/2015.
  */

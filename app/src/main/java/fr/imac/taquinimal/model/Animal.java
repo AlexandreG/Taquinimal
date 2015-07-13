@@ -52,7 +52,11 @@ public class Animal {
      * @param paint
      */
     public void draw(Canvas canvas, Paint paint) {
-        canvas.drawBitmap(bp, x - bp.getWidth() / 2, y - bp.getHeight() / 2, paint);
+        try {
+            canvas.drawBitmap(bp, x - bp.getWidth() / 2, y - bp.getHeight() / 2, paint);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -223,14 +227,31 @@ public class Animal {
     }
 
     public enum AnimalType {
-        CROCO,
-        BEAR,
-        CAT,
-        OWL,
-        SNAKE,
-        MOUSE,
-        ELEPHANT,
-        FROG
+        ERROR(-1),
+        CROCO(1),
+        BEAR(2),
+        CAT(3),
+        OWL(4),
+        SNAKE(5),
+        MOUSE(6),
+        ELEPHANT(7),
+        FROG(8);
+
+        private int code;
+
+        AnimalType(int code) {
+            this.code = code;
+        }
+
+        public int getCode() {
+            return code;
+        }
+        public static AnimalType getAnimalFromCode(int code){
+            for(AnimalType e : AnimalType.values()){
+                if(code == e.code) return e;
+            }
+            return AnimalType.ERROR; //or null
+        }
     }
 
     public enum AnimalState {
