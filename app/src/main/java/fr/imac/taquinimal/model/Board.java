@@ -67,6 +67,13 @@ public class Board {
     }
 
     /**
+     * Return the id of the animal at the given pos or -1 if empty
+     */
+    public int getBox(int i, int j){
+        return map[i][j];
+    }
+
+    /**
      * Save in the map the id of the given animal or -1 if empty
      */
     public void setBox(int i, int j, int id) {

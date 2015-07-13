@@ -13,6 +13,7 @@ import fr.imac.taquinimal.model.Animal;
 import fr.imac.taquinimal.model.Board;
 import fr.imac.taquinimal.utils.GameHelper;
 import fr.imac.taquinimal.utils.Utils;
+import fr.imac.taquinimal.utils.Values;
 
 /**
  * The engine update the view and the models
@@ -146,26 +147,50 @@ public class GameEngine implements Animal.AnimalListener {
     }
 
     public void onSwipeUp() {
-        for (Animal a : animalList) {
-            a.moveUp();
+        int id = -1;
+        for (int j = 0; j <=  Values.BOARD_SIZE - 1; ++j) {
+            for (int i = 0; i <= Values.BOARD_SIZE - 1; ++i) {
+                id = board.getBox(i,j);
+                if (id !=-1) {
+                    animalList.get(id).moveUp(board);
+                }
+            }
         }
     }
 
     public void onSwipeDown() {
-        for (Animal a : animalList) {
-            a.moveDown();
+        int id = -1;
+        for (int j = Values.BOARD_SIZE - 1; j >= 0; --j) {
+            for (int i = 0; i <= Values.BOARD_SIZE - 1; ++i) {
+                id = board.getBox(i,j);
+                if (id !=-1) {
+                    animalList.get(id).moveDown(board);
+                }
+            }
         }
     }
 
     public void onSwipeLeft() {
-        for (Animal a : animalList) {
-            a.moveLeft();
+        int id = -1;
+        for (int i = 0 ; i <= Values.BOARD_SIZE - 1; ++i) {
+            for (int j = 0; j <= Values.BOARD_SIZE - 1; ++j) {
+                id = board.getBox(i,j);
+                if (id !=-1) {
+                    animalList.get(id).moveLeft(board);
+                }
+            }
         }
     }
 
     public void onSwipeRight() {
-        for (Animal a : animalList) {
-            a.moveRight();
+        int id = -1;
+        for (int i = Values.BOARD_SIZE - 1; i >= 0; --i) {
+            for (int j = 0; j <= Values.BOARD_SIZE - 1; ++j) {
+                id = board.getBox(i,j);
+                if (id !=-1) {
+                    animalList.get(id).moveRight(board);
+                }
+            }
         }
     }
 
@@ -173,8 +198,8 @@ public class GameEngine implements Animal.AnimalListener {
         return lastEvent;
     }
 
-    public void savePosOnBoard(Animal a) {
-        board.setBox(a.getMapX(), a.getMapY(), animalList.indexOf(a));
+    public void savePosOnBoard(int mapX, int mapY, Animal a) {
+        board.setBox(mapX, mapY, animalList.indexOf(a));
     }
 
     public int getNbAnimalMoving() {
@@ -186,8 +211,8 @@ public class GameEngine implements Animal.AnimalListener {
     }
 
     @Override
-    public void reachedNewPos(Animal a) {
-        savePosOnBoard(a);
+    public void targetNewPos(int mapX, int mapY, Animal a) {
+        savePosOnBoard(mapX, mapY, a);
     }
 
     @Override
@@ -196,7 +221,7 @@ public class GameEngine implements Animal.AnimalListener {
     }
 
     @Override
-    public void stopedMoving() {
+    public void stoppedMoving() {
         --nbAnimalMoving;
     }
 
