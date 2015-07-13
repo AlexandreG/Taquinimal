@@ -2,10 +2,8 @@ package fr.imac.taquinimal.controller;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 
 import fr.imac.taquinimal.App;
 import fr.imac.taquinimal.R;
@@ -18,27 +16,33 @@ public class GameActivity extends Activity {
     private GameThread gameThread;
     private GameEngine engine;
 
-    private LinearLayout globalWrapper;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        App.getInstance().initGameActivity(this);
-
         super.onCreate(savedInstanceState);
 
-        //Full screen
+        App.getInstance().initGameActivity(this);
+        engine = new GameEngine();
+
+        setFullScreen();
+        setContentView(R.layout.activity_game);
+
+        initViews();
+        initListeners();
+        startGame();
+    }
+
+    private void setFullScreen() {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    }
 
-        engine = new GameEngine();
-        setContentView(R.layout.activity_game);
-
+    private void initViews() {
         view = (GameView) findViewById(R.id.gameview);
+    }
 
-        globalWrapper = (LinearLayout) findViewById(R.id.global_wrapper);
-
-        globalWrapper.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
+    private void initListeners() {
+        findViewById(R.id.global_wrapper).setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
             public void onSwipeTop() {
                 engine.onSwipe(Swipe.UP);
             }
@@ -55,12 +59,16 @@ public class GameActivity extends Activity {
                 engine.onSwipe(Swipe.DOWN);
             }
         });
+    }
+
+    /**
+     * Init and start gameThread
+     */
+    private void startGame() {
         gameThread = new GameThread(engine);
         gameThread.setState(GameThread.RUNNING);
         gameThread.start();
     }
-
-    //TODO: add listeners
 
 
     /**

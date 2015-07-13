@@ -8,7 +8,6 @@ import android.view.Display;
 import android.view.WindowManager;
 
 import fr.imac.taquinimal.controller.GameActivity;
-import fr.imac.taquinimal.utils.Values;
 
 /**
  * Created by AG on 23/06/2015.
@@ -22,7 +21,12 @@ public class App extends Application {
     private int screenW;
     private int screenH;
 
-    private int boardWidth;
+    /**
+     * @return ApplicationController singleton instance
+     */
+    public static synchronized App getInstance() {
+        return sInstance;
+    }
 
     @Override
     public void onCreate() {
@@ -35,8 +39,6 @@ public class App extends Application {
 
     private void initializeInstance() {
         context = getApplicationContext();
-
-        initScreenSize();
     }
 
     private void initScreenSize() {
@@ -57,13 +59,6 @@ public class App extends Application {
         gameActivity = ga;
     }
 
-    /**
-     * @return ApplicationController singleton instance
-     */
-    public static synchronized App getInstance() {
-        return sInstance;
-    }
-
     public Context getContext() {
         return context;
     }
@@ -72,20 +67,5 @@ public class App extends Application {
         return gameActivity;
     }
 
-    public int getScreenH(){
-        return screenH;
-    }
-
-    public int getScreenW(){
-        return screenW;
-    }
-
-    public int getBoardWidth() {
-        return boardWidth;
-    }
-
-    public void setBoardWidth(int boardWidth) {
-        this.boardWidth = boardWidth;
-    }
 }
 

@@ -7,6 +7,7 @@ import android.graphics.Paint;
 
 import fr.imac.taquinimal.App;
 import fr.imac.taquinimal.R;
+import fr.imac.taquinimal.utils.GameHelper;
 import fr.imac.taquinimal.utils.Utils;
 import fr.imac.taquinimal.utils.Values;
 
@@ -16,13 +17,11 @@ import fr.imac.taquinimal.utils.Values;
  * Created by AG on 23/06/2015.
  */
 public class Board {
-    private int[][] map;//the map of the game : -1 if empty, id of the animal in the list else
-    private Bitmap bp;
-
     private final float width;
     private final int x;
     private final int y;
-
+    private int[][] map;//the map of the game : -1 if empty, id of the animal in the list else
+    private Bitmap bp;
     private float boxWidth;
 
     public Board() {
@@ -33,9 +32,9 @@ public class Board {
             }
         }
 
-        width = App.getInstance().getBoardWidth();
-        x = App.getInstance().getBoardWidth() / 2;
-        y = App.getInstance().getBoardWidth() / 2;
+        width = GameHelper.getInstance().getBoardWidth();
+        x = (int) width / 2;
+        y = (int) width / 2;
 
         boxWidth = width / Values.BOARD_SIZE;
 

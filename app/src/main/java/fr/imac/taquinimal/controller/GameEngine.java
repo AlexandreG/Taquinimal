@@ -2,27 +2,24 @@ package fr.imac.taquinimal.controller;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.util.Log;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
-import java.util.Random;
 
 import fr.imac.taquinimal.App;
 import fr.imac.taquinimal.R;
 import fr.imac.taquinimal.model.Animal;
 import fr.imac.taquinimal.model.Board;
+import fr.imac.taquinimal.utils.GameHelper;
 import fr.imac.taquinimal.utils.Utils;
-import fr.imac.taquinimal.utils.Values;
 
 /**
  * The engine update the view and the models
  * <p/>
  * Created by AG on 23/06/2015.
  */
-public class GameEngine {
+public class GameEngine implements Animal.AnimalListener {
     private LinkedList<Animal> animalList;
     private HashMap<Animal.AnimalType, Bitmap> animalImageList;
 
@@ -31,27 +28,29 @@ public class GameEngine {
     private int nbAnimalMoving;
     private GameActivity.Swipe lastEvent;
 
+    //prevent OnMesure to init the game several times
+    private boolean isGameInitiated = false;
+
     public void initGame() {
-        animalList = new LinkedList<Animal>();
-        animalImageList = new HashMap<Animal.AnimalType, Bitmap>();
-        board = new Board();
+        if (!isGameInitiated) {
+            animalList = new LinkedList<Animal>();
+            animalImageList = new HashMap<Animal.AnimalType, Bitmap>();
+            board = new Board();
 
-        //init the bitmap with the righ size
-        loadAnimalBitmaps();
+            //init the bitmap with the right size
+            loadAnimalBitmaps();
 
-        //add few animals
-        animalList.add(new Animal(this, Animal.AnimalType.BEAR, animalImageList.get(Animal.AnimalType.BEAR), 0, 0, getXPosFromMap(0), getYPosFromMap(0)));
-        board.setBox(animalList.get(0).getMapX(), animalList.get(0).getMapY(), 0);
-        animalList.add(new Animal(this, Animal.AnimalType.CAT, animalImageList.get(Animal.AnimalType.CAT), 3, 4, getXPosFromMap(3), getYPosFromMap(4)));
-        board.setBox(animalList.get(1).getMapX(), animalList.get(1).getMapY(), 1);
-        animalList.add(new Animal(this, Animal.AnimalType.ELEPHANT, animalImageList.get(Animal.AnimalType.ELEPHANT), 3, 2, getXPosFromMap(3), getYPosFromMap(2)));
-        board.setBox(animalList.get(2).getMapX(), animalList.get(2).getMapY(), 2);
+            //add few animals
+            fillBoard();
+
+            isGameInitiated = true;
+        }
     }
 
     /**
      * Load bitmaps from memory to java objects
      */
-    private void loadAnimalBitmaps(){
+    private void loadAnimalBitmaps() {
         //load the bitmaps
         LinkedList<Bitmap> temp = new LinkedList<Bitmap>();
         temp.add(BitmapFactory.decodeResource(App.getInstance().getContext().getResources(), R.drawable.bear));
@@ -75,9 +74,18 @@ public class GameEngine {
 
 
         //release memory
-        for (Bitmap b : temp){
+        for (Bitmap b : temp) {
             b.recycle();
         }
+    }
+
+    private void fillBoard() {
+        animalList.add(new Animal(this, Animal.AnimalType.BEAR, animalImageList.get(Animal.AnimalType.BEAR), 0, 0, GameHelper.getInstance().getXPosFromMap(0), GameHelper.getInstance().getYPosFromMap(0)));
+        board.setBox(animalList.get(0).getMapX(), animalList.get(0).getMapY(), 0);
+        animalList.add(new Animal(this, Animal.AnimalType.CAT, animalImageList.get(Animal.AnimalType.CAT), 3, 4, GameHelper.getInstance().getXPosFromMap(3), GameHelper.getInstance().getYPosFromMap(4)));
+        board.setBox(animalList.get(1).getMapX(), animalList.get(1).getMapY(), 1);
+        animalList.add(new Animal(this, Animal.AnimalType.ELEPHANT, animalImageList.get(Animal.AnimalType.ELEPHANT), 3, 2, GameHelper.getInstance().getXPosFromMap(3), GameHelper.getInstance().getYPosFromMap(2)));
+        board.setBox(animalList.get(2).getMapX(), animalList.get(2).getMapY(), 2);
     }
 
     /**
@@ -92,9 +100,9 @@ public class GameEngine {
      * Move all animals and board
      */
     private void moveAll() {
-        if (animalList !=null){
-            for (Animal a : animalList){
-                a.move();
+        if (animalList != null) {
+            for (Animal a : animalList) {
+                a.move(lastEvent);
             }
         }
     }
@@ -114,57 +122,13 @@ public class GameEngine {
         return board;
     }
 
-    /**
-     * Convert the position from the map to the coordinate in the screen
-     * @param xMap
-     * @return
-     */
-    public float getXPosFromMap(int xMap){
-        return 0.5f*board.getBoxWidth()+xMap*board.getBoxWidth();
-    }
 
-    /**
-     * Convert the position from the map to the coordinate in the screen
-     * @param yMap
-     * @return
-     */
-    public float getYPosFromMap(int yMap){
-        return 0.5f*board.getBoxWidth()+yMap*board.getBoxWidth();
-        //return App.getInstance().getScreenH()/2-0.5f*board.getWidth()+0.5f*board.getBoxWidth()+yMap*board.getBoxWidth();
-    }
-
-    /**
-     * Convert the coordinate in the screen to the position in the map
-     */
-    public int getXMapFromPos(float x){
-        Log.d("a", "x "+x+ " between 0 and "+board.getWidth() );
-        for(int i=0 ; i<Values.BOARD_SIZE ; ++i){
-            if(i*board.getBoxWidth()<= x && x <= (i+1)*board.getBoxWidth()){
-                Log.d("a", "returned "+i);
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * Convert the coordinate in the screen to the position in the map
-     */
-    public int getYMapFromPos(float y){
-        for(int i=0 ; i<Values.BOARD_SIZE ; ++i){
-            if(i*board.getBoxWidth()<= y && y <= (i+1)*board.getBoxWidth()){
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    public void onSwipe(GameActivity.Swipe s){
-        Log.d("a", "event : "+s);
+    public void onSwipe(GameActivity.Swipe s) {
+        Log.d("a", "event : " + s);
 
         lastEvent = s;
-        if(nbAnimalMoving == 0){
-            switch (s){
+        if (nbAnimalMoving == 0) {
+            switch (s) {
                 case UP:
                     onSwipeUp();
                     break;
@@ -181,26 +145,26 @@ public class GameEngine {
         }
     }
 
-    public void onSwipeUp(){
-        for (Animal a : animalList){
+    public void onSwipeUp() {
+        for (Animal a : animalList) {
             a.moveUp();
         }
     }
 
-    public void onSwipeDown(){
-        for (Animal a : animalList){
+    public void onSwipeDown() {
+        for (Animal a : animalList) {
             a.moveDown();
         }
     }
 
-    public void onSwipeLeft(){
-        for (Animal a : animalList){
+    public void onSwipeLeft() {
+        for (Animal a : animalList) {
             a.moveLeft();
         }
     }
 
-    public void onSwipeRight(){
-        for (Animal a : animalList){
+    public void onSwipeRight() {
+        for (Animal a : animalList) {
             a.moveRight();
         }
     }
@@ -209,22 +173,37 @@ public class GameEngine {
         return lastEvent;
     }
 
-    public void savePosOnBoard(Animal a){
+    public void savePosOnBoard(Animal a) {
         board.setBox(a.getMapX(), a.getMapY(), animalList.indexOf(a));
+    }
+
+    public int getNbAnimalMoving() {
+        return nbAnimalMoving;
     }
 
     public void setNbAnimalMoving(int nbAnimalMoving) {
         this.nbAnimalMoving = nbAnimalMoving;
     }
 
-    public void setNbAnimalMovingPlus1() {
-        ++nbAnimalMoving;
+    @Override
+    public void reachedNewPos(Animal a) {
+        savePosOnBoard(a);
     }
-    public void setNbAnimalMovingMinus1() {
+
+    @Override
+    public void leavingPos(int mapX, int mapY) {
+        board.setBox(mapX, mapY, -1);
+    }
+
+    @Override
+    public void stopedMoving() {
         --nbAnimalMoving;
     }
 
-    public int getNbAnimalMoving() {
-        return nbAnimalMoving;
+    @Override
+    public void startMoving() {
+        ++nbAnimalMoving;
     }
+
+
 }

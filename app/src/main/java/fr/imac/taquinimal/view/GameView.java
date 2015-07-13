@@ -5,19 +5,18 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
 import fr.imac.taquinimal.App;
+import fr.imac.taquinimal.controller.GameActivity;
 import fr.imac.taquinimal.controller.GameEngine;
 import fr.imac.taquinimal.model.Animal;
+import fr.imac.taquinimal.utils.GameHelper;
 import fr.imac.taquinimal.utils.Values;
 
-/** The Android view of the game
- *
+/**
+ * The Android view of the game
+ * <p/>
  * Created by AG on 23/06/2015.
  */
 public class GameView extends View {
@@ -43,7 +42,7 @@ public class GameView extends View {
     }
 
     private void init() {
-        this.engine = App.getInstance().getGameActivity().getEngine();
+        this.engine = ((GameActivity) getContext()).getEngine();
 
         paint = new Paint();
         paint.setAntiAlias(true);
@@ -78,7 +77,9 @@ public class GameView extends View {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         int width = getMeasuredWidth();
-        App.getInstance().setBoardWidth(width);
+        GameHelper.getInstance().setBoardWidth(width);
+        GameHelper.getInstance().setBoxWidth(width / Values.BOARD_SIZE);
+
         setMeasuredDimension(width, width);
 
         //now we have the size of the view, we can init the game

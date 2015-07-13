@@ -5,16 +5,17 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.Log;
 
-import fr.imac.taquinimal.controller.GameEngine;
+import fr.imac.taquinimal.controller.GameActivity;
+import fr.imac.taquinimal.utils.GameHelper;
 import fr.imac.taquinimal.utils.Values;
 
 /**
  * Created by AG on 23/06/2015.
  */
 public class Animal {
-    public final static float WALL_COLLIDE_PAD = Values.ANIMAL_SPEED/2;
+    public final static float WALL_COLLIDE_PAD = Values.ANIMAL_SPEED / 2;
 
-    private GameEngine engine;
+    private AnimalListener listener;
 
     private AnimalType type;
     private AnimalState state;
@@ -29,8 +30,8 @@ public class Animal {
     private float targetX; //the x pos of the destination of the movment
     private float targetY;
 
-    public Animal(GameEngine e, AnimalType type, Bitmap bp, int mapX, int mapY, float x, float y) {
-        this.engine = e;
+    public Animal(AnimalListener l, AnimalType type, Bitmap bp, int mapX, int mapY, float x, float y) {
+        this.listener = l;
         this.type = type;
         this.bp = bp;
         this.x = x;
@@ -39,70 +40,73 @@ public class Animal {
         this.mapY = mapY;
         this.speedX = 0;
         this.speedY = 0;
+
+        //Log.d("a", "new animal : "+mapX+" "+mapY+" "+x+" "+y);
     }
 
     /**
      * Draw itself
+     *
      * @param canvas
      * @param paint
      */
-    public void draw(Canvas canvas, Paint paint){
+    public void draw(Canvas canvas, Paint paint) {
         canvas.drawBitmap(bp, x - bp.getWidth() / 2, y - bp.getHeight() / 2, paint);
     }
 
     /**
      * Move itself
      */
-    public void move(){
-        if(engine.getLastEvent() != null){
+    public void move(GameActivity.Swipe lastEvent) {
+        if (lastEvent != null) {
             //collide
-            switch (engine.getLastEvent()){
+            switch (lastEvent) {
                 case DOWN:
-                    if(targetY <y){
+                    if (targetY < y) {
                         y = targetY;
                         x = targetX;
-                        mapY = engine.getYMapFromPos(y);
-                        engine.savePosOnBoard(this);
+                        mapY = GameHelper.getInstance().getYMapFromPos(y);
+                        listener.reachedNewPos(this);
                         state = AnimalState.IDLE;
-                        engine.setNbAnimalMovingMinus1();
+                        listener.stopedMoving();
                         Log.w("a", "collide down " + mapX + " " + mapY);
                     }
                     break;
                 case UP:
-                    if(targetY > y){
+                    if (targetY > y) {
                         y = targetY;
                         x = targetX;
-                        mapY = engine.getYMapFromPos(y);
+                        mapY = GameHelper.getInstance().getYMapFromPos(y);
 
-                        engine.savePosOnBoard(this);
+                        listener.reachedNewPos(this);
                         state = AnimalState.IDLE;
-                        engine.setNbAnimalMovingMinus1();
+                        listener.stopedMoving();
                         Log.w("a", "collide up " + mapX + " " + mapY);
                     }
 
                     break;
                 case LEFT:
-                    if(targetX > x){
+                    if (targetX > x) {
                         y = targetY;
                         x = targetX;
-                        mapX = engine.getXMapFromPos(x);
+                        mapX = GameHelper.getInstance().getXMapFromPos(x);
 
-                        engine.savePosOnBoard(this);
+                        listener.reachedNewPos(this);
                         state = AnimalState.IDLE;
-                        engine.setNbAnimalMovingMinus1();
+                        listener.stopedMoving();
                         Log.w("a", "collide left " + mapX + " " + mapY);
                     }
 
                     break;
                 case RIGHT:
-                    if(targetX < x){
+                    if (targetX < x) {
                         y = targetY;
                         x = targetX;
-                        mapX = engine.getXMapFromPos(x);
+                        mapX = GameHelper.getInstance().getXMapFromPos(x);
 
-                        engine.savePosOnBoard(this);
+                        listener.reachedNewPos(this);
                         state = AnimalState.IDLE;
-                        engine.setNbAnimalMovingMinus1();
+                        listener.stopedMoving();
                         Log.w("a", "collide right " + mapX + " " + mapY);
                     }
 
@@ -111,74 +115,74 @@ public class Animal {
         }
 
 
-        if(state == AnimalState.MOVING){
-            x +=speedX;
-            y +=speedY;
+        if (state == AnimalState.MOVING) {
+            x += speedX;
+            y += speedY;
         }
     }
 
 
-    public void moveRight(){
+    public void moveRight() {
         //no wall on the right
-        if(mapX != Values.BOARD_SIZE-1){
+        if (mapX != Values.BOARD_SIZE - 1) {
             //if no idle animal
 //            if(engine.getBoard().isMapEmpty(mapX+1, mapY)){
 //
 //            }
 
-            targetX = engine.getXPosFromMap(Values.BOARD_SIZE-1);
+            targetX = GameHelper.getInstance().getXPosFromMap(Values.BOARD_SIZE - 1);
             targetY = y;
-            engine.getBoard().setBox(mapX, mapY, -1);
+            listener.leavingPos(mapX, mapY);
 
             setSpeed(Values.ANIMAL_SPEED, 0);
             state = AnimalState.MOVING;
-            engine.setNbAnimalMovingPlus1();
+            listener.startMoving();
         }
     }
 
-    public void moveLeft(){
+    public void moveLeft() {
         //no wall on the left
-        if(mapX != 0){
+        if (mapX != 0) {
 
-            targetX = engine.getXPosFromMap(0);
+            targetX = GameHelper.getInstance().getXPosFromMap(0);
             targetY = y;
-            engine.getBoard().setBox(mapX, mapY, -1);
+            listener.leavingPos(mapX, mapY);
 
             setSpeed(-Values.ANIMAL_SPEED, 0);
             state = AnimalState.MOVING;
-            engine.setNbAnimalMovingPlus1();
+            listener.startMoving();
         }
     }
 
-    public void moveUp(){
+    public void moveUp() {
         //no wall up
-        if(mapY != 0){
+        if (mapY != 0) {
 
-            targetY = engine.getXPosFromMap(0);
+            targetY = GameHelper.getInstance().getXPosFromMap(0);
             targetX = x;
-            engine.getBoard().setBox(mapX, mapY, -1);
+            listener.leavingPos(mapX, mapY);
 
             setSpeed(0, -Values.ANIMAL_SPEED);
             state = AnimalState.MOVING;
-            engine.setNbAnimalMovingPlus1();
+            listener.startMoving();
         }
     }
 
-    public void moveDown(){
+    public void moveDown() {
         //no wall down
-        if(mapY != Values.BOARD_SIZE-1){
+        if (mapY != Values.BOARD_SIZE - 1) {
 
-            targetY = engine.getYPosFromMap(Values.BOARD_SIZE-1);
+            targetY = GameHelper.getInstance().getYPosFromMap(Values.BOARD_SIZE - 1);
             targetX = x;
-            engine.getBoard().setBox(mapX, mapY, -1);
+            listener.leavingPos(mapX, mapY);
 
             setSpeed(0, Values.ANIMAL_SPEED);
             state = AnimalState.MOVING;
-            engine.setNbAnimalMovingPlus1();
+            listener.startMoving();
         }
     }
 
-    public void setSpeed(float speedX, float speedY){
+    public void setSpeed(float speedX, float speedY) {
         this.speedX = speedX;
         this.speedY = speedY;
     }
@@ -203,13 +207,22 @@ public class Animal {
         SNAKE,
         MOUSE,
         ELEPHANT,
-        FROG;
+        FROG
     }
 
-    public enum AnimalState{
+    public enum AnimalState {
         IDLE,
-        MOVING;
+        MOVING
     }
 
+    public interface AnimalListener {
+        public void reachedNewPos(Animal a);
+
+        public void leavingPos(int mapX, int mapY);
+
+        public void stopedMoving();
+
+        public void startMoving();
+    }
 
 }
