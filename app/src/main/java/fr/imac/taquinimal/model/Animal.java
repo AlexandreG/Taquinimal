@@ -62,10 +62,9 @@ public class Animal {
      */
     public void move(GameActivity.Swipe lastEvent) {
         if (state == AnimalState.MOVING) {
-            if (!isThereCollision(lastEvent)) {
-                x += speedX;
-                y += speedY;
-            }
+            x += speedX;
+            y += speedY;
+            isThereCollision(lastEvent);
         }
 
     }
