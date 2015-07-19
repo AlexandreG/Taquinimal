@@ -6,7 +6,7 @@ package fr.imac.taquinimal.utils;
 public class Values {
     public static final int FPS = 50;
 
-    public static final float ANIMAL_SPEED = 30;
+    public static final float ANIMAL_SPEED = 50;
 
     public static final int BOARD_SIZE = 5; //the number of cell
     public static final int NB_ANIMAL_AT_LAUNCH = 4;
