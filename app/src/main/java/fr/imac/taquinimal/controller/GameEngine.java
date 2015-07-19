@@ -11,6 +11,7 @@ import java.util.Random;
 import fr.imac.taquinimal.App;
 import fr.imac.taquinimal.R;
 import fr.imac.taquinimal.model.Animal;
+import fr.imac.taquinimal.model.AnimalType;
 import fr.imac.taquinimal.model.Board;
 import fr.imac.taquinimal.utils.GameHelper;
 import fr.imac.taquinimal.utils.Utils;
@@ -23,9 +24,10 @@ import fr.imac.taquinimal.utils.Values;
  */
 public class GameEngine implements Animal.AnimalListener {
     private LinkedList<Animal> animalList;
+    private LinkedList<Animal> animalToRemove;
     private int nbAnimalToAdd;
 
-    private HashMap<Animal.AnimalType, Bitmap> animalImageList;
+    private HashMap<AnimalType, Bitmap> animalImageList;
 
     private Board board;
 
@@ -40,8 +42,9 @@ public class GameEngine implements Animal.AnimalListener {
         if (!isGameInitiated) {
             r = new Random();
             animalList = new LinkedList<Animal>();
+            animalToRemove = new LinkedList<Animal>();
             nbAnimalToAdd = 0;
-            animalImageList = new HashMap<Animal.AnimalType, Bitmap>();
+            animalImageList = new HashMap<AnimalType, Bitmap>();
             board = new Board();
 
             //init the bitmap with the right size
@@ -60,24 +63,22 @@ public class GameEngine implements Animal.AnimalListener {
     private void loadAnimalBitmaps() {
         //load the bitmaps
         LinkedList<Bitmap> temp = new LinkedList<Bitmap>();
+        temp.add(BitmapFactory.decodeResource(App.getInstance().getContext().getResources(), R.drawable.croco));
         temp.add(BitmapFactory.decodeResource(App.getInstance().getContext().getResources(), R.drawable.bear));
         temp.add(BitmapFactory.decodeResource(App.getInstance().getContext().getResources(), R.drawable.cat));
-        temp.add(BitmapFactory.decodeResource(App.getInstance().getContext().getResources(), R.drawable.croco));
-        temp.add(BitmapFactory.decodeResource(App.getInstance().getContext().getResources(), R.drawable.elephant));
-        temp.add(BitmapFactory.decodeResource(App.getInstance().getContext().getResources(), R.drawable.frog));
-        temp.add(BitmapFactory.decodeResource(App.getInstance().getContext().getResources(), R.drawable.mouse));
         temp.add(BitmapFactory.decodeResource(App.getInstance().getContext().getResources(), R.drawable.owl));
         temp.add(BitmapFactory.decodeResource(App.getInstance().getContext().getResources(), R.drawable.snake));
+        temp.add(BitmapFactory.decodeResource(App.getInstance().getContext().getResources(), R.drawable.mouse));
+        temp.add(BitmapFactory.decodeResource(App.getInstance().getContext().getResources(), R.drawable.elephant));
 
         //resize the bitmaps
-        animalImageList.put(Animal.AnimalType.BEAR, Utils.getResizedBitmap(temp.get(0), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
-        animalImageList.put(Animal.AnimalType.CAT, Utils.getResizedBitmap(temp.get(1), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
-        animalImageList.put(Animal.AnimalType.CROCO, Utils.getResizedBitmap(temp.get(2), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
-        animalImageList.put(Animal.AnimalType.ELEPHANT, Utils.getResizedBitmap(temp.get(3), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
-        animalImageList.put(Animal.AnimalType.FROG, Utils.getResizedBitmap(temp.get(4), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
-        animalImageList.put(Animal.AnimalType.MOUSE, Utils.getResizedBitmap(temp.get(5), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
-        animalImageList.put(Animal.AnimalType.OWL, Utils.getResizedBitmap(temp.get(6), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
-        animalImageList.put(Animal.AnimalType.SNAKE, Utils.getResizedBitmap(temp.get(7), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
+        animalImageList.put(AnimalType.CROCO, Utils.getResizedBitmap(temp.get(0), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
+        animalImageList.put(AnimalType.BEAR, Utils.getResizedBitmap(temp.get(1), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
+        animalImageList.put(AnimalType.CAT, Utils.getResizedBitmap(temp.get(2), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
+        animalImageList.put(AnimalType.OWL, Utils.getResizedBitmap(temp.get(3), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
+        animalImageList.put(AnimalType.SNAKE, Utils.getResizedBitmap(temp.get(4), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
+        animalImageList.put(AnimalType.MOUSE, Utils.getResizedBitmap(temp.get(5), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
+        animalImageList.put(AnimalType.ELEPHANT, Utils.getResizedBitmap(temp.get(6), (int) board.getBoxWidth(), (int) board.getBoxWidth()));
 
         //release memory
         for (Bitmap b : temp) {
@@ -92,17 +93,17 @@ public class GameEngine implements Animal.AnimalListener {
      */
     private void addAnimal(int n) {
         Animal a;
-        Animal.AnimalType type;
+        AnimalType type;
         int[] mapPos;
 
         for (int i = 0; i < n; ++i) {
             type = Utils.getRandomAnimalType(r);
-            Log.d("a", "new animal : "+type);
+            Log.d("a", "new animal : " + type);
             mapPos = board.getAvailablePos(r);
             if (mapPos != null) {
                 a = new Animal(this, type, animalImageList.get(type), mapPos[0], mapPos[1], GameHelper.getInstance().getXPosFromMap(mapPos[0]), GameHelper.getInstance().getYPosFromMap(mapPos[1]));
                 animalList.add(a);
-                board.setBox(mapPos[0], mapPos[1], animalList.indexOf(a));
+                board.setBox(mapPos[0], mapPos[1], a);
             }
         }
         //todo: deal with the game over
@@ -114,9 +115,28 @@ public class GameEngine implements Animal.AnimalListener {
     public void update() {
         moveAll();
         drawAll();
-        if(nbAnimalToAdd!=0){
-            addAnimal(nbAnimalToAdd);
-            nbAnimalToAdd = 0;
+        updateAnimalList();
+    }
+
+    /**
+     * Add new animals and remove the killed ones
+     */
+    private void updateAnimalList() {
+        if(animalList != null){
+            synchronized (animalList) {
+                if (nbAnimalToAdd != 0) {
+                    addAnimal(nbAnimalToAdd);
+                    nbAnimalToAdd = 0;
+
+                    //if we have to had animals, that mean that we finished the animation,
+                    //so we can remove the killed ones
+                    for (Animal a : animalToRemove) {
+                        animalList.remove(a);
+                        Log.d("zdq", "removed 1");
+                    }
+                    animalToRemove.clear();
+                }
+            }
         }
     }
 
@@ -170,48 +190,48 @@ public class GameEngine implements Animal.AnimalListener {
     }
 
     public void onSwipeUp() {
-        int id = -1;
+        Animal a = null;
         for (int j = 0; j <= Values.BOARD_SIZE - 1; ++j) {
             for (int i = 0; i <= Values.BOARD_SIZE - 1; ++i) {
-                id = board.getBox(i, j);
-                if (id != -1) {
-                    animalList.get(id).moveUp(board);
+                a = board.getBox(i, j);
+                if (a != null) {
+                    a.moveUp(board);
                 }
             }
         }
     }
 
     public void onSwipeDown() {
-        int id = -1;
+        Animal a = null;
         for (int j = Values.BOARD_SIZE - 1; j >= 0; --j) {
             for (int i = 0; i <= Values.BOARD_SIZE - 1; ++i) {
-                id = board.getBox(i, j);
-                if (id != -1) {
-                    animalList.get(id).moveDown(board);
+                a = board.getBox(i, j);
+                if (a != null) {
+                    a.moveDown(board);
                 }
             }
         }
     }
 
     public void onSwipeLeft() {
-        int id = -1;
+        Animal a = null;
         for (int i = 0; i <= Values.BOARD_SIZE - 1; ++i) {
             for (int j = 0; j <= Values.BOARD_SIZE - 1; ++j) {
-                id = board.getBox(i, j);
-                if (id != -1) {
-                    animalList.get(id).moveLeft(board);
+                a = board.getBox(i, j);
+                if (a != null) {
+                    a.moveLeft(board);
                 }
             }
         }
     }
 
     public void onSwipeRight() {
-        int id = -1;
+        Animal a = null;
         for (int i = Values.BOARD_SIZE - 1; i >= 0; --i) {
             for (int j = 0; j <= Values.BOARD_SIZE - 1; ++j) {
-                id = board.getBox(i, j);
-                if (id != -1) {
-                    animalList.get(id).moveRight(board);
+                a = board.getBox(i, j);
+                if (a != null) {
+                    a.moveRight(board);
                 }
             }
         }
@@ -222,7 +242,7 @@ public class GameEngine implements Animal.AnimalListener {
     }
 
     public void savePosOnBoard(int mapX, int mapY, Animal a) {
-        board.setBox(mapX, mapY, animalList.indexOf(a));
+        board.setBox(mapX, mapY, a);
     }
 
     public int getNbAnimalMoving() {
@@ -240,13 +260,13 @@ public class GameEngine implements Animal.AnimalListener {
 
     @Override
     public void leavingPos(int mapX, int mapY) {
-        board.setBox(mapX, mapY, -1);
+        board.setBox(mapX, mapY, null);
     }
 
     @Override
     public void stoppedMoving() {
         --nbAnimalMoving;
-        if(nbAnimalMoving == 0){
+        if (nbAnimalMoving == 0) {
             ++nbAnimalToAdd;
         }
     }
@@ -254,6 +274,11 @@ public class GameEngine implements Animal.AnimalListener {
     @Override
     public void startMoving() {
         ++nbAnimalMoving;
+    }
+
+    @Override
+    public void willEatAnimal(Animal a) {
+        animalToRemove.add(a);
     }
 
 

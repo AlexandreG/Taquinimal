@@ -23,15 +23,15 @@ public class Board {
     private final float width;
     private final int x;
     private final int y;
-    private int[][] map;//the map of the game : -1 if empty, id of the animal in the list else
+    private Animal[][] map;//the map of the game : -1 if empty, id of the animal in the list else
     private Bitmap bp;
     private float boxWidth;
 
     public Board() {
-        map = new int[Values.BOARD_SIZE][Values.BOARD_SIZE];
+        map = new Animal[Values.BOARD_SIZE][Values.BOARD_SIZE];
         for (int i = 0; i < Values.BOARD_SIZE; ++i) {
             for (int j = 0; j < Values.BOARD_SIZE; ++j) {
-                map[i][j] = -1;
+                map[i][j] = null;
             }
         }
 
@@ -62,7 +62,7 @@ public class Board {
      * @return
      */
     public boolean isMapEmpty(int i, int j) {
-        if (map[i][j] == -1) {
+        if (map[i][j] == null) {
             return true;
         } else {
             return false;
@@ -80,7 +80,7 @@ public class Board {
         //First we list all availables positions
         for (int i = 0; i < map.length; ++i) {
             for (int j = 0; j < map.length; ++j) {
-                if (map[i][j] == -1) {
+                if (map[i][j] == null) {
                     availablePos.add(new int[]{i, j});
                 }
             }
@@ -93,16 +93,16 @@ public class Board {
     }
 
     /**
-     * Return the id of the animal at the given pos or -1 if empty
+     * Return the animal at the given pos or -1 if empty
      */
-    public int getBox(int i, int j) {
+    public Animal getBox(int i, int j) {
         return map[i][j];
     }
 
     /**
-     * Save in the map the id of the given animal or -1 if empty
+     * Save in the map the given animal or -1 if empty
      */
-    public void setBox(int i, int j, int id) {
+    public void setBox(int i, int j, Animal id) {
         map[i][j] = id;
     }
 

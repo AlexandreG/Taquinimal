@@ -52,7 +52,7 @@ public class Animal {
      * @param paint
      */
     public void draw(Canvas canvas, Paint paint) {
-        if(bp != null){
+        if (bp != null) {
             canvas.drawBitmap(bp, x - bp.getWidth() / 2, y - bp.getHeight() / 2, paint);
         }
     }
@@ -64,9 +64,10 @@ public class Animal {
         if (state == AnimalState.MOVING) {
             x += speedX;
             y += speedY;
-            isThereCollision(lastEvent);
+            if (isThereCollision(lastEvent)) {
+                stopMoving();
+            }
         }
-
     }
 
     /**
@@ -80,130 +81,137 @@ public class Animal {
             switch (lastEvent) {
                 case DOWN:
                     if (targetY < y) {
-                        y = targetY;
-                        x = targetX;
-                        state = AnimalState.IDLE;
-                        listener.stoppedMoving();
-                        Log.w("a", "collide down " + mapX + " " + mapY);
                         return true;
                     }
                     break;
                 case UP:
                     if (targetY > y) {
-                        y = targetY;
-                        x = targetX;
-                        state = AnimalState.IDLE;
-                        listener.stoppedMoving();
-                        Log.w("a", "collide up " + mapX + " " + mapY);
                         return true;
                     }
-
                     break;
                 case LEFT:
                     if (targetX > x) {
-                        y = targetY;
-                        x = targetX;
-                        state = AnimalState.IDLE;
-                        listener.stoppedMoving();
-                        Log.w("a", "collide left " + mapX + " " + mapY);
                         return true;
                     }
-
                     break;
                 case RIGHT:
                     if (targetX < x) {
-                        y = targetY;
-                        x = targetX;
-                        state = AnimalState.IDLE;
-                        listener.stoppedMoving();
-                        Log.w("a", "collide right " + mapX + " " + mapY);
                         return true;
                     }
-
                     break;
             }
         }
         return false;
     }
 
+    /**
+     * A collision occurred, we stop moving
+     */
+    private void stopMoving() {
+        y = targetY;
+        x = targetX;
+        state = AnimalState.IDLE;
+        listener.stoppedMoving();
+        Log.w("a", "collide right " + mapX + " " + mapY);
+    }
+
+    /**
+     * An event moveRight occurred and is sent to the animal
+     * Check if no collision, and the launch the movement
+     *
+     * @param b the board of the game
+     */
     public void moveRight(Board b) {
+        Animal a;
         for (int i = Values.BOARD_SIZE - 1; i > mapX; --i) {
-            if (b.getBox(i, mapY) == -1) {
-                //empty box => lets go!
-                targetY = y;
-                targetX = GameHelper.getInstance().getYPosFromMap(i);
-
-                listener.leavingPos(mapX, mapY);
-                mapX = GameHelper.getInstance().getYMapFromPos(targetX);
-                listener.targetNewPos(mapX, mapY, this);
-
-                setSpeed(Values.ANIMAL_SPEED, 0);
-                state = AnimalState.MOVING;
-                listener.startMoving();
-
+            a = b.getBox(i, mapY);
+            if (a == null) {
+                //empty box => lets go
+                proceedMove(GameHelper.getInstance().getXPosFromMap(i), y, Values.ANIMAL_SPEED, 0);
                 return;
+            } else {
+                //if there is an eatable animal
+                if (this.type.canIEatThis(a.type)) {
+                    //if there is nothing between us and the animal to eat
+                    if (i == mapX + 1 || b.getBox(i - 1, mapY) == null) {
+                        proceedMove(GameHelper.getInstance().getXPosFromMap(i), y, Values.ANIMAL_SPEED, 0);
+                        listener.willEatAnimal(a);
+                        return;
+
+                    }
+                }
             }
         }
     }
 
+    /**
+     * An event moveLeft occured and is sent to the animal
+     * Check if no collision, and the launch the movement
+     *
+     * @param b the board of the game
+     */
     public void moveLeft(Board b) {
         for (int i = 0; i < mapX; ++i) {
-            if (b.getBox(i, mapY) == -1) {
+            if (b.getBox(i, mapY) == null) {
                 //empty box => lets go!
-                targetY = y;
-                targetX = GameHelper.getInstance().getYPosFromMap(i);
-
-                listener.leavingPos(mapX, mapY);
-                mapX = GameHelper.getInstance().getYMapFromPos(targetX);
-                listener.targetNewPos(mapX, mapY, this);
-
-                setSpeed(-Values.ANIMAL_SPEED, 0);
-                state = AnimalState.MOVING;
-                listener.startMoving();
-
+                proceedMove(GameHelper.getInstance().getYPosFromMap(i), y, -Values.ANIMAL_SPEED, 0);
                 return;
             }
         }
     }
 
+    /**
+     * An event moveUp occured and is sent to the animal
+     * Check if no collision, and the launch the movement
+     *
+     * @param b the board of the game
+     */
     public void moveUp(Board b) {
         for (int j = 0; j < mapY; ++j) {
-            if (b.getBox(mapX, j) == -1) {
+            if (b.getBox(mapX, j) == null) {
                 //empty box => lets go!
-                targetY = GameHelper.getInstance().getYPosFromMap(j);
-                targetX = x;
-
-                listener.leavingPos(mapX, mapY);
-                mapY = GameHelper.getInstance().getYMapFromPos(targetY);
-                listener.targetNewPos(mapX, mapY, this);
-
-                setSpeed(0, -Values.ANIMAL_SPEED);
-                state = AnimalState.MOVING;
-                listener.startMoving();
-
+                proceedMove(x, GameHelper.getInstance().getYPosFromMap(j), 0, -Values.ANIMAL_SPEED);
                 return;
             }
         }
     }
 
+    /**
+     * An event moveDown occured and is sent to the animal
+     * Check if no collision, and the launch the movement
+     *
+     * @param b the board of the game
+     */
     public void moveDown(Board b) {
         for (int j = Values.BOARD_SIZE - 1; j > mapY; --j) {
-            if (b.getBox(mapX, j) == -1) {
+            if (b.getBox(mapX, j) == null) {
                 //empty box => lets go!
-                targetY = GameHelper.getInstance().getYPosFromMap(j);
-                targetX = x;
-
-                listener.leavingPos(mapX, mapY);
-                mapY = GameHelper.getInstance().getYMapFromPos(targetY);
-                listener.targetNewPos(mapX, mapY, this);
-
-                setSpeed(0, Values.ANIMAL_SPEED);
-                state = AnimalState.MOVING;
-                listener.startMoving();
-
+                proceedMove(x, GameHelper.getInstance().getYPosFromMap(j), 0, Values.ANIMAL_SPEED);
                 return;
             }
         }
+    }
+
+    /**
+     * Launch the movement of the animal with the given
+     *
+     * @param tX the x pos of the target to reach
+     * @param tY the y pos of the target to reach
+     * @param sX the x speed to apply
+     * @param sY the y speed to apply
+     */
+    private void proceedMove(float tX, float tY, float sX, float sY) {
+        targetX = tX;
+        targetY = tY;
+
+        listener.leavingPos(mapX, mapY);
+        mapX = GameHelper.getInstance().getXMapFromPos(targetX);
+        mapY = GameHelper.getInstance().getYMapFromPos(targetY);
+        listener.targetNewPos(mapX, mapY, this);
+
+        setSpeed(sX, sY);
+        state = AnimalState.MOVING;
+        listener.startMoving();
     }
 
     public void setSpeed(float speedX, float speedY) {
@@ -223,33 +231,6 @@ public class Animal {
         this.state = state;
     }
 
-    public enum AnimalType {
-        CROCO(1),
-        BEAR(2),
-        CAT(3),
-        OWL(4),
-        SNAKE(5),
-        MOUSE(6),
-        ELEPHANT(7),
-        FROG(8);
-
-        private int code;
-
-        AnimalType(int code) {
-            this.code = code;
-        }
-
-        public int getCode() {
-            return code;
-        }
-        public static AnimalType getAnimalFromCode(int code){
-            for(AnimalType e : AnimalType.values()){
-                if(code == e.code) return e;
-            }
-            return null;
-        }
-    }
-
     public enum AnimalState {
         IDLE,
         MOVING
@@ -263,6 +244,8 @@ public class Animal {
         public void stoppedMoving();
 
         public void startMoving();
+
+        public void willEatAnimal(Animal a);
     }
 
 }

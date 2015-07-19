@@ -6,6 +6,7 @@ import android.graphics.Matrix;
 import java.util.Random;
 
 import fr.imac.taquinimal.model.Animal;
+import fr.imac.taquinimal.model.AnimalType;
 
 /**
  * Created by AG on 23/06/2015.
@@ -33,7 +34,7 @@ public class Utils {
 
     }
 
-    public static Animal.AnimalType getRandomAnimalType(Random r){
-        return Animal.AnimalType.getAnimalFromCode(r.nextInt(Animal.AnimalType.values().length-1)+1);
+    public static AnimalType getRandomAnimalType(Random r){
+        return AnimalType.getAnimalFromCode(r.nextInt(AnimalType.values().length-1)+1);
     }
 }
