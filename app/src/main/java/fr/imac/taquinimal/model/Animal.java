@@ -112,7 +112,7 @@ public class Animal {
         x = targetX;
         state = AnimalState.IDLE;
         listener.stoppedMoving();
-        Log.w("a", "collide right " + mapX + " " + mapY);
+        //Log.w("a", "collide right " + mapX + " " + mapY);
     }
 
     /**
@@ -137,7 +137,6 @@ public class Animal {
                         proceedMove(GameHelper.getInstance().getXPosFromMap(i), y, Values.ANIMAL_SPEED, 0);
                         listener.willEatAnimal(a);
                         return;
-
                     }
                 }
             }
@@ -145,49 +144,85 @@ public class Animal {
     }
 
     /**
-     * An event moveLeft occured and is sent to the animal
+     * An event moveLeft occurred and is sent to the animal
      * Check if no collision, and the launch the movement
      *
      * @param b the board of the game
      */
     public void moveLeft(Board b) {
+        Animal a;
         for (int i = 0; i < mapX; ++i) {
-            if (b.getBox(i, mapY) == null) {
-                //empty box => lets go!
+            a = b.getBox(i, mapY);
+            if (a == null) {
+                //empty box => lets go
                 proceedMove(GameHelper.getInstance().getYPosFromMap(i), y, -Values.ANIMAL_SPEED, 0);
                 return;
+            } else {
+                //if there is an eatable animal
+                if (this.type.canIEatThis(a.type)) {
+                    //if there is nothing between us and the animal to eat
+                    if (i == mapX - 1 || b.getBox(i + 1, mapY) == null) {
+                        proceedMove(GameHelper.getInstance().getYPosFromMap(i), y, -Values.ANIMAL_SPEED, 0);
+                        listener.willEatAnimal(a);
+                        return;
+                    }
+                }
             }
         }
     }
 
     /**
-     * An event moveUp occured and is sent to the animal
+     * An event moveUp occurred and is sent to the animal
      * Check if no collision, and the launch the movement
      *
      * @param b the board of the game
      */
     public void moveUp(Board b) {
+        Animal a;
         for (int j = 0; j < mapY; ++j) {
-            if (b.getBox(mapX, j) == null) {
-                //empty box => lets go!
+            a = b.getBox(mapX, j);
+            if (a == null) {
+                //empty box => lets go
                 proceedMove(x, GameHelper.getInstance().getYPosFromMap(j), 0, -Values.ANIMAL_SPEED);
                 return;
+            } else {
+                //if there is an eatable animal
+                if (this.type.canIEatThis(a.type)) {
+                    //if there is nothing between us and the animal to eat
+                    if (j == mapY - 1 || b.getBox(mapX, j + 1) == null) {
+                        proceedMove(x, GameHelper.getInstance().getYPosFromMap(j), 0, -Values.ANIMAL_SPEED);
+                        listener.willEatAnimal(a);
+                        return;
+                    }
+                }
             }
         }
     }
 
     /**
-     * An event moveDown occured and is sent to the animal
+     * An event moveDown occurred and is sent to the animal
      * Check if no collision, and the launch the movement
      *
      * @param b the board of the game
      */
     public void moveDown(Board b) {
+        Animal a;
         for (int j = Values.BOARD_SIZE - 1; j > mapY; --j) {
-            if (b.getBox(mapX, j) == null) {
-                //empty box => lets go!
+            a = b.getBox(mapX, j);
+            if (a == null) {
+                //empty box => lets go
                 proceedMove(x, GameHelper.getInstance().getYPosFromMap(j), 0, Values.ANIMAL_SPEED);
                 return;
+            } else {
+                //if there is an eatable animal
+                if (this.type.canIEatThis(a.type)) {
+                    //if there is nothing between us and the animal to eat
+                    if (j == mapY + 1 || b.getBox(mapX, j - 1) == null) {
+                        proceedMove(x, GameHelper.getInstance().getYPosFromMap(j), 0, Values.ANIMAL_SPEED);
+                        listener.willEatAnimal(a);
+                        return;
+                    }
+                }
             }
         }
     }

@@ -98,7 +98,7 @@ public class GameEngine implements Animal.AnimalListener {
 
         for (int i = 0; i < n; ++i) {
             type = Utils.getRandomAnimalType(r);
-            Log.d("a", "new animal : " + type);
+            //Log.d("a", "new animal : " + type);
             mapPos = board.getAvailablePos(r);
             if (mapPos != null) {
                 a = new Animal(this, type, animalImageList.get(type), mapPos[0], mapPos[1], GameHelper.getInstance().getXPosFromMap(mapPos[0]), GameHelper.getInstance().getYPosFromMap(mapPos[1]));
@@ -132,7 +132,6 @@ public class GameEngine implements Animal.AnimalListener {
                     //so we can remove the killed ones
                     for (Animal a : animalToRemove) {
                         animalList.remove(a);
-                        Log.d("zdq", "removed 1");
                     }
                     animalToRemove.clear();
                 }

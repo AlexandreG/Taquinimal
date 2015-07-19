@@ -35,6 +35,6 @@ public class Utils {
     }
 
     public static AnimalType getRandomAnimalType(Random r){
-        return AnimalType.getAnimalFromCode(r.nextInt(AnimalType.values().length-1)+1);
+        return AnimalType.getAnimalFromCode(r.nextInt(AnimalType.values().length)+1);
     }
 }
