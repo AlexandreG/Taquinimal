@@ -7,7 +7,7 @@ import android.view.WindowManager;
 
 import fr.imac.taquinimal.App;
 import fr.imac.taquinimal.R;
-import fr.imac.taquinimal.utils.OnSwipeTouchListener;
+import fr.imac.taquinimal.view.OnSwipeTouchListener;
 import fr.imac.taquinimal.view.GameView;
 
 

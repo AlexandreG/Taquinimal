@@ -1,4 +1,4 @@
-package fr.imac.taquinimal.utils;
+package fr.imac.taquinimal.view;
 
 import android.content.Context;
 import android.view.GestureDetector;
