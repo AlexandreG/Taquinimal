@@ -7,6 +7,8 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 
+import java.util.Iterator;
+
 import fr.imac.taquinimal.App;
 import fr.imac.taquinimal.controller.GameActivity;
 import fr.imac.taquinimal.controller.GameEngine;
@@ -67,7 +69,9 @@ public class GameView extends View {
 
         engine.getBoard().draw(canvas, paint);
 
-        for (Animal a : engine.getAnimalList()) {
+        Iterator<Animal> it = engine.getAnimalList().iterator();
+        while (it.hasNext()) {
+            Animal a = it.next();
             a.draw(canvas, paint);
         }
     }
