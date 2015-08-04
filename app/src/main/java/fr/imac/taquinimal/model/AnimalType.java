@@ -8,9 +8,7 @@ public enum AnimalType {
     BEAR(2),
     CAT(3),
     OWL(4),
-    SNAKE(5),
-    MOUSE(6),
-    ELEPHANT(7);
+    SNAKE(5);
 
     private int code;
 
