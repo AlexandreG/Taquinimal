@@ -7,7 +7,7 @@ crocodile < snake < owl < cat < bear < crocodile < ...
 
 Current layout : 
 
-![alt text](http://www.hostingpics.net/viewer.php?id=180347Screenshot20161023141453.png "Taquinimal current screen")
+![alt text](http://img15.hostingpics.net/thumbs/mini_180347Screenshot20161023141453.png "Taquinimal current screen")
 
 #### Licence
 Project under GNU GPL v2 licence.
